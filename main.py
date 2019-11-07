@@ -24,7 +24,8 @@ def speak(text):
 def get_audio():
     r = sr.Recognizer()
     with sr.Microphone() as source:
-        print("Say something...")
+        speak("Hello, I am Noman, How can I help you?")
+        print("Listening...")
         audio = r.listen(source)
         said = ""
         try:
@@ -68,10 +69,36 @@ def get_events(date, service):
     events = events_result.get('items', [])
 
     if not events:
-        print('No upcoming events found.')
-    for event in events:
-        start = event['start'].get('dateTime', event['start'].get('date'))
-        print(start, event['summary'])
+        speak('Sorry, You have no upcoming events on this day.')
+    else:
+        event_num = len(events)
+        if event_num > 1:
+            speak(f"you have {event_num} events, on this day.")
+            print("Your events are:")
+        else:
+            speak(f"you have only {event_num} event, on this day.")
+            print("Your event is:")
+
+        for event in events:
+            start = event['start'].get('dateTime', event['start'].get('date'))
+            print(start, event['summary'])
+
+            start_hour = str(start.split("T")[1].split(":")[0])
+            start_minute = str(start.split("T")[1].split(":")[1])
+            start_time = ""
+            if int(start_hour) < 12:
+                if int(start_minute) > 0:
+                    start_time = start_hour + start_minute + " am"
+                else:
+                    start_time = start_hour + " am"
+            else:
+                start_hour = str(int(start_hour) - 12)
+                if int(start_minute) > 0:
+                    start_time = start_hour + start_minute + " pm"
+                else:
+                    start_time = start_hour + " pm"
+            
+            speak(event['summary'] + " at " + start_time)
 
 def get_date(text):
     text = text.lower()
@@ -122,14 +149,25 @@ def get_date(text):
     return datetime.date(month=month, day=day, year=year)
 
 
-""" 
-Say for testing:
-What's going on Wednessday? or
-What's going on next Wednessday?
-"""
-service = authenticate_google_calender()
+SERVICE = authenticate_google_calender()
 text = get_audio()
-print("Your result:")
-get_events(get_date(text), service)
+CALENDAR_STRINGS = [
+    "what i have", "do i have plans", "do i have any plan", "am i busy", "mi busy"
+]
+for phrase in CALENDAR_STRINGS:
+    if phrase in text.lower():
+        date = get_date(text)
+        if date:
+            get_events(date, SERVICE)
+            break
+        else:
+            speak("i can't help you, without mentioning a day, please try again, with mention a day.")
+            break
+else:
+    speak("sorry, i can't understan, please try again")
+
+
+
+
 
 
