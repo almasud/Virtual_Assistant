@@ -7,9 +7,9 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 import os
 import time
+import pyttsx3
 import speech_recognition as sr
-import playsound
-from gtts import gTTS
+import pytz
 
 SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
 MONTHS = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"]
@@ -17,10 +17,9 @@ DAYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sun
 DAY_EXTENSIOS = ["rd", "th", "st"]
 
 def speak(text):
-    tts = gTTS(text=text, lang="en")
-    filename = "voice.mp3"
-    tts.save(filename)
-    playsound.playsound(filename)
+    engine = pyttsx3.init()
+    engine.say(text)
+    engine.runAndWait()
 
 def get_audio():
     r = sr.Recognizer()
@@ -58,12 +57,13 @@ def authenticate_google_calender():
     service = build('calendar', 'v3', credentials=creds)
     return service
 
-def get_calendar_event(n, service):
+def get_events(date, service):
     # Call the Calendar API
-    now = datetime.datetime.utcnow().isoformat() + 'Z' # 'Z' indicates UTC time
-    print(f'Getting the upcoming {n} events')
-    events_result = service.events().list(calendarId='primary', timeMin=now,
-                                        maxResults=n, singleEvents=True,
+    start_date = datetime.datetime.combine(date, datetime.datetime.min.time())  # Ex. 2019-11-07 00:00:00
+    end_date = datetime.datetime.combine(date, datetime.datetime.max.time())  # Ex. 2019-11-07 23:59:59.999999
+
+    events_result = service.events().list(calendarId='primary', timeMin=start_date.isoformat() + 'Z',
+                                        timeMax=end_date.isoformat() + 'Z', singleEvents=True,
                                         orderBy='startTime').execute()
     events = events_result.get('items', [])
 
@@ -112,19 +112,24 @@ def get_date(text):
         if diff < 0:
             diff += 7
             if text.count("next") >= 1:
-                diff +=7
+                diff += 7
 
-        return today + datetime.timedelta(diff)  # ex. 2019-11-07 + 7 days, 0:00:00
+        return today + datetime.timedelta(diff)  # Ex. 2019-11-07 + 7 days, 0:00:00
+    
+    if month == -1 or day == -1:
+        return None
 
     return datetime.date(month=month, day=day, year=year)
 
 
+""" 
+Say for testing:
+What's going on Wednessday? or
+What's going on next Wednessday?
 """
-Read the line for test:
-Do I have anything in 24th march
-Book a ticket for me at monday.
-Book a ticket for me at next monday.
-"""
-text = get_audio().lower()
-print(get_date(text))
+service = authenticate_google_calender()
+text = get_audio()
+print("Your result:")
+get_events(get_date(text), service)
+
 
