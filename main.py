@@ -10,6 +10,8 @@ import time
 import pyttsx3
 import speech_recognition as sr
 import pytz
+import subprocess
+
 
 SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
 MONTHS = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"]
@@ -24,7 +26,6 @@ def speak(text):
 def get_audio():
     r = sr.Recognizer()
     with sr.Microphone() as source:
-        speak("Hello, I am Noman, How can I help you?")
         print("Listening...")
         audio = r.listen(source)
         said = ""
@@ -73,10 +74,10 @@ def get_events(date, service):
     else:
         event_num = len(events)
         if event_num > 1:
-            speak(f"you have {event_num} events, on this day.")
+            speak(f"You have {event_num} events, on this day.")
             print("Your events are:")
         else:
-            speak(f"you have only {event_num} event, on this day.")
+            speak(f"You have only {event_num} event, on this day.")
             print("Your event is:")
 
         for event in events:
@@ -148,8 +149,17 @@ def get_date(text):
 
     return datetime.date(month=month, day=day, year=year)
 
+def note(text):
+    date = datetime.datetime.now()
+    file_name = str(date).replace(":", "-") + "-note.txt"
+    with open(file_name, "w") as f:
+        f.write(text)
+    
+    subprocess.Popen(["notepad.exe", file_name])
+
 
 SERVICE = authenticate_google_calender()
+speak("Hello, I am your assistant. How can I help you?")
 text = get_audio()
 CALENDAR_STRINGS = [
     "what i have", "do i have plans", "do i have any plan", "am i busy", "mi busy"
@@ -161,10 +171,22 @@ for phrase in CALENDAR_STRINGS:
             get_events(date, SERVICE)
             break
         else:
-            speak("i can't help you, without mentioning a day, please try again, with mention a day.")
+            speak("I can't help you, without mentioning a day, please try again, with mention a day.")
             break
 else:
-    speak("sorry, i can't understan, please try again")
+    NOTE_STRINGS = ["make a note", "write this down", "remember this"]
+    for phrase in NOTE_STRINGS:
+        if phrase in text:
+            speak("What would you like to me write down?")
+            note_text = get_audio().lower()
+            note(note_text)
+            speak("I have made a note of that")
+            break
+            
+    else:
+        speak("Sorry, I can't understan, please try again")
+
+
 
 
 
