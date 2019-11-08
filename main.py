@@ -23,6 +23,7 @@ def speak(text):
     engine.say(text)
     engine.runAndWait()
 
+
 def get_audio():
     r = sr.Recognizer()
     with sr.Microphone() as source:
@@ -36,12 +37,14 @@ def get_audio():
             print("Opps! could not understand audio: " + str(err))
     return said
 
+
 # Code for google calender
 def authenticate_google_calender():
     """Shows basic usage of the Google Calendar API.
     Prints the start and name of the next 10 events on the user's calendar.
     """
     creds = None
+
     if os.path.exists('token.pickle'):
         with open('token.pickle', 'rb') as token:
             creds = pickle.load(token)
@@ -55,9 +58,10 @@ def authenticate_google_calender():
         # Save the credentials for the next run
         with open('token.pickle', 'wb') as token:
             pickle.dump(creds, token)
-
+    
     service = build('calendar', 'v3', credentials=creds)
     return service
+
 
 def get_events(date, service):
     # Call the Calendar API
@@ -83,10 +87,10 @@ def get_events(date, service):
         for event in events:
             start = event['start'].get('dateTime', event['start'].get('date'))
             print(start, event['summary'])
-
             start_hour = str(start.split("T")[1].split(":")[0])
             start_minute = str(start.split("T")[1].split(":")[1])
             start_time = ""
+
             if int(start_hour) < 12:
                 if int(start_minute) > 0:
                     start_time = start_hour + start_minute + " am"
@@ -98,8 +102,9 @@ def get_events(date, service):
                     start_time = start_hour + start_minute + " pm"
                 else:
                     start_time = start_hour + " pm"
-            
+
             speak(event['summary'] + " at " + start_time)
+
 
 def get_date(text):
     text = text.lower()
@@ -149,12 +154,13 @@ def get_date(text):
 
     return datetime.date(month=month, day=day, year=year)
 
+
 def note(text):
     date = datetime.datetime.now()
     file_name = str(date).replace(":", "-") + "-note.txt"
     with open(file_name, "w") as f:
         f.write(text)
-    
+
     subprocess.Popen(["notepad.exe", file_name])
 
 
@@ -164,6 +170,8 @@ text = get_audio()
 CALENDAR_STRINGS = [
     "what i have", "do i have plans", "do i have any plan", "am i busy", "mi busy"
 ]
+NOTE_STRINGS = ["make a note", "write this down", "remember this"]
+
 for phrase in CALENDAR_STRINGS:
     if phrase in text.lower():
         date = get_date(text)
@@ -174,15 +182,13 @@ for phrase in CALENDAR_STRINGS:
             speak("I can't help you, without mentioning a day, please try again, with mention a day.")
             break
 else:
-    NOTE_STRINGS = ["make a note", "write this down", "remember this"]
     for phrase in NOTE_STRINGS:
         if phrase in text:
             speak("What would you like to me write down?")
             note_text = get_audio().lower()
             note(note_text)
             speak("I have made a note of that")
-            break
-            
+            break      
     else:
         speak("Sorry, I can't understan, please try again")
 

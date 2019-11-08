@@ -1,6 +1,7 @@
 venv
 *.mp3
 *.pickle
+*.txt
 
 
  
