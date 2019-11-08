@@ -159,34 +159,43 @@ def note(text):
     subprocess.Popen(["notepad.exe", file_name])
 
 
-SERVICE = authenticate_google_calender()
-speak("Hello, I am your assistant. How can I help you?")
-text = get_audio().lower()
-CALENDAR_STRINGS = [
-    "what i have", "do i have plans", "do i have any plan", "am i busy", "mi busy"
-]
-NOTE_STRINGS = ["make a note", "write this down", "remember this"]
+if __name__ == "__main__":
+    SERVICE = authenticate_google_calender()
+    CALENDAR_STRINGS = [
+        "what i have", "do i have plans", "do i have any plan", "am i busy", "mi busy"
+    ]
+    NOTE_STRINGS = ["make a note", "write this down", "remember this"]
+    AWAKE = "hello assistant"
 
-for phrase in CALENDAR_STRINGS:
-    if phrase in text:
-        date = get_date(text)
-        if date:
-            get_events(date, SERVICE)
-            break
-        else:
-            speak("I can't help you, without mentioning a day, please try again, with mention a day.")
-            break
-else:
-    for phrase in NOTE_STRINGS:
-        if phrase in text:
-            speak("What would you like to me write down?")
-            note_text = get_audio()
-            note(note_text)
-            speak("I have made a note of that")
-            break      
-    else:
-        speak("Sorry, I can't understan, please try again")
+    while True:
+        try:
+            print("Say '" + AWAKE + "' for response")
+            if get_audio().lower().count(AWAKE) > 0:
+                speak("Hello, I am your assistant. How can I help you?")
+                text = get_audio().lower()
 
+                for phrase in CALENDAR_STRINGS:
+                    if phrase in text:
+                        date = get_date(text)
+                        if date:
+                            get_events(date, SERVICE)
+                            break
+                        else:
+                            speak("I can't help you, without mentioning a day, please try again, with mention a day.")
+                            break
+                else:
+                    for phrase in NOTE_STRINGS:
+                        if phrase in text:
+                            speak("What would you like to me write down?")
+                            note_text = get_audio()
+                            note(note_text)
+                            speak("I have made a note of that")
+                            break      
+                    else:
+                        speak("Sorry, I can't understan, please try again")
+        except Exception as e:
+            pass
+ 
 
 
 
