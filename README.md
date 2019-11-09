@@ -3,14 +3,16 @@ Install virtualenv using pip:
 ```
 pip install virtualenv
 ```
-Create a virtual environment in the name of 'venv'
+
+Create a virtual environment
 ```
 virtualenv venv
 ```
+```venv``` can be any name.
+
 ### Active virtualenv:
 #### For Windows:
 In the project directory type ```"venv/Scripts/activate.bat"``` and hit enter
-
 #### For Linux:
 In the project directory type ```source/venv/bin/activate``` and hit enter
 
