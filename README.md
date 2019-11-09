@@ -1,22 +1,26 @@
 # Installation
-Install virtualenv using pip:
+To create a virtual environment
+### Install virtualenv using ```pip```:
 ```
 pip install virtualenv
 ```
 
-Create a virtual environment
+Now, In the project root directory
+### Create a virtual environment using ```virtualenv```:
 ```
 virtualenv venv
 ```
 ```venv``` can be any name.
 
-### Active virtualenv:
+Now it's time to active the vrtual environment
+### Active virtual environment ```venv```:
+In the project root directory type:
 #### For Windows:
-In the project directory type ```"venv/Scripts/activate.bat"``` and hit enter
+```"venv/Scripts/activate.bat"``` and hit enter
 #### For Linux:
-In the project directory type ```source/venv/bin/activate``` and hit enter
+```source/venv/bin/activate``` and hit enter
 
-#### Now install some required libraries for our projects:
+#### Now install some required libraries for our project:
 ```
 pip install SpeechRecognition
 pip install pyttsx3
