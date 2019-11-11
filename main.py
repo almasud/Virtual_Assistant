@@ -1,170 +1,46 @@
-from __future__ import print_function
-import datetime
-import pickle
-import os.path
-from googleapiclient.discovery import build
-from google_auth_oauthlib.flow import InstalledAppFlow
-from google.auth.transport.requests import Request
-import os
-import time
-import pyttsx3
-import speech_recognition as sr
-import pytz
-import subprocess
+import tkinter as tk
+# Import from custom modules
+from ui import MainView
+from corelib import (
+    authenticate_google_calender, get_audio, speak, note,
+    get_date, get_events
+)
 
+root = tk.Tk()
 
-SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
-MONTHS = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"]
-DAYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
-DAY_EXTENSIOS = ["rd", "th", "st"]
-
-def speak(text):
-    engine = pyttsx3.init()
-    engine.say(text)
-    engine.runAndWait()
-
-
-def get_audio():
-    r = sr.Recognizer()
-    with sr.Microphone() as source:
-        print("Listening...")
-        audio = r.listen(source)
-        said = ""
-        try:
-            said = r.recognize_google(audio)
-            print("You say: " + said)
-        except LookupError as err:
-            print("Opps! could not understand audio: " + str(err))
-    return said
-
-
-# Code for google calender
-def authenticate_google_calender():
-    """Shows basic usage of the Google Calendar API.
-    Prints the start and name of the next 10 events on the user's calendar.
-    """
-    creds = None
-
-    if os.path.exists('token.pickle'):
-        with open('token.pickle', 'rb') as token:
-            creds = pickle.load(token)
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
-            flow = InstalledAppFlow.from_client_secrets_file(
-                'credentials.json', SCOPES)
-            creds = flow.run_local_server(port=0)
-        # Save the credentials for the next run
-        with open('token.pickle', 'wb') as token:
-            pickle.dump(creds, token)
-    
-    service = build('calendar', 'v3', credentials=creds)
-    return service
-
-
-def get_events(date, service):
-    # Call the Calendar API
-    start_date = datetime.datetime.combine(date, datetime.datetime.min.time())  # Ex. 2019-11-07 00:00:00
-    end_date = datetime.datetime.combine(date, datetime.datetime.max.time())  # Ex. 2019-11-07 23:59:59.999999
-
-    events_result = service.events().list(calendarId='primary', timeMin=start_date.isoformat() + 'Z',
-                                        timeMax=end_date.isoformat() + 'Z', singleEvents=True,
-                                        orderBy='startTime').execute()
-    events = events_result.get('items', [])
-
-    if not events:
-        speak('Sorry, You have no upcoming events on this day.')
-    else:
-        event_num = len(events)
-        if event_num > 1:
-            speak(f"You have {event_num} events, on this day.")
-            print("Your events are:")
-        else:
-            speak(f"You have only {event_num} event, on this day.")
-            print("Your event is:")
-
-        for event in events:
-            start = event['start'].get('dateTime', event['start'].get('date'))
-            print(start, event['summary'])
-            start_time = str(start.split("T")[1].split("-")[0])
-
-            if int(start_time.split(":")[0]) < 12:
-                start_time = start_time.split(":")[0] + ":" + start_time.split(":")[1]
-                start_time += "am"
-                print(start_time)
-            else:
-                start_time = str(int(start_time.split(":")[0]) - 12) + ":" + start_time.split(":")[1]
-                start_time += "pm"
-                print(start_time)
-
-            speak(event['summary'] + ", at " + start_time)
-
-
-def get_date(text):
-    text = text.lower()
-    today = datetime.date.today()
-
-    if text.count("today") > 0:
-        return today
-
-    day = -1
-    day_of_week = -1
-    month = -1
-    year = today.year
-
-    for word in text.split():
-        if word in MONTHS:
-            month = MONTHS.index(word) + 1
-        elif word in DAYS:
-            day_of_week = DAYS.index(word)
-        elif word.isdigit():
-            day = int(word)
-        else:
-            for ext in DAY_EXTENSIOS:
-                found = word.find(ext)  # ex. 5th
-                if found > 0:
-                    try:
-                        day = int(word[:found])
-                    except:
-                        pass
-    
-    if month < today.month and month != -1:
-        year += 1
-    if day < today.day and day != -1 and month == -1:
-        month += month
-    if month == -1 and day == -1 and day_of_week != -1:
-        current_day_of_week = today.weekday()  # 0-6
-        diff = day_of_week - current_day_of_week
-        
-        if diff < 0:
-            diff += 7
-            if text.count("next") >= 1:
-                diff += 7
-
-        return today + datetime.timedelta(diff)  # Ex. 2019-11-07 + 7 days, 0:00:00
-    
-    if month == -1 or day == -1:
-        return None
-
-    return datetime.date(month=month, day=day, year=year)
-
-
-def note(text):
-    date = datetime.datetime.now()
-    file_name = str(date).replace(":", "-") + "-note.txt"
-    with open(file_name, "w") as f:
-        f.write(text)
-
-    subprocess.Popen(["notepad.exe", file_name])
+# Creating a basic window
+root.geometry("400x400")
+root.title("Virtual Assistant")
+root.iconbitmap("avatar.ico")
 
 
 if __name__ == "__main__":
+    main_view = MainView(root)
+    main_view.pack(side="top", fill="both", expand=True)
+
+    # Add menus
+    menu = tk.Menu(root)
+    root.config(menu=menu)
+
+    file_menu = tk.Menu(menu)
+    menu.add_cascade(label="File", menu=file_menu)
+    file_menu.add_command(label="Exit", command=root.destroy)
+    edit_menu = tk.Menu(menu)
+    menu.add_cascade(label="Edit", menu=edit_menu)
+    edit_menu.add_command(label="Settings", command=main_view.p2.show)
+
+    root.mainloop()
+
     SERVICE = authenticate_google_calender()
-    CALENDAR_STRINGS = [
-        "what i have", "do i have plans", "do i have any plan", "am i busy", "mi busy"
-    ]
-    NOTE_STRINGS = ["make a note", "write this down", "remember this"]
+    CALENDAR_STRINGS = ""
+    NOTE_STRINGS = ""
+
+    with open("calendar_strings.txt", "r") as file:
+        CALENDAR_STRINGS = file.read().split(";")
+
+    with open("calendar_strings.txt", "r") as file:
+        NOTE_STRINGS = file.read().split(";")
+    
     AWAKE = "hello assistant"
 
     while True:
@@ -195,11 +71,5 @@ if __name__ == "__main__":
                         speak("Sorry, I can't understan, please try again")
         except Exception as e:
             pass
+
  
-
-
-
-
-
-
-

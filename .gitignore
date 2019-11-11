@@ -1,7 +1,8 @@
 venv
+notes
 *.mp3
 *.pickle
-*.txt
+test.py
 
 
  
