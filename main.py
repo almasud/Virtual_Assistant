@@ -1,4 +1,7 @@
 import tkinter as tk
+import tkinter.messagebox
+import threading
+
 # Import from custom modules
 from ui import MainView
 from corelib import (
@@ -7,11 +10,55 @@ from corelib import (
 )
 
 root = tk.Tk()
-
+    
 # Creating a basic window
-root.geometry("400x400")
+root.geometry("420x400")
 root.title("Virtual Assistant")
 root.iconbitmap("avatar.ico")
+
+class Worker(threading.Thread):
+    def run(self):
+        # long process goes here
+        self.assistant_loop()
+
+    def assistant_loop(self, awake="hello assistant"):
+        SERVICE = authenticate_google_calender()
+        calendar_strings = []
+        note_strings = []
+
+        with open("calendar_strings.txt", "r") as file:
+            calendar_strings = file.read().split(";")
+        with open("note_strings.txt", "r") as file:
+            note_strings = file.read().split(";")
+
+        while True:
+            try:
+                print("Say '" + awake + "' for response")
+                if get_audio().lower().count(awake) > 0:
+                    speak("Hello, I am your assistant. How can I help you?")
+                    text = get_audio().lower()
+
+                    for phrase in calendar_strings:
+                        if phrase in text:
+                            date = get_date(text)
+                            if date:
+                                get_events(date, SERVICE)
+                                break
+                            else:
+                                speak("I can't help you, without mentioning a day, please try again, with mention a day.")
+                                break
+                    else:
+                        for phrase in note_strings:
+                            if phrase in text:
+                                speak("What would you like to me write down?")
+                                note_text = get_audio()
+                                note(note_text)
+                                speak("I have made a note of that")
+                                break      
+                        else:
+                            speak("Sorry, I can't understan, please try again")
+            except:
+                pass
 
 
 if __name__ == "__main__":
@@ -29,47 +76,18 @@ if __name__ == "__main__":
     menu.add_cascade(label="Edit", menu=edit_menu)
     edit_menu.add_command(label="Settings", command=main_view.p2.show)
 
+    # Add status bar
+    status_bar= tk.Label(main_view.bottom_frame, text="Status", bd=1, relief="sunken", anchor="w")
+    status_bar.pack(side="bottom", fill="x")
+
     root.mainloop()
 
-    SERVICE = authenticate_google_calender()
-    CALENDAR_STRINGS = ""
-    NOTE_STRINGS = ""
-
-    with open("calendar_strings.txt", "r") as file:
-        CALENDAR_STRINGS = file.read().split(";")
-
-    with open("calendar_strings.txt", "r") as file:
-        NOTE_STRINGS = file.read().split(";")
+    # w = Worker()
+    # w.start()
+    # tkinter.messagebox.showinfo("Work Started", "OK started working")
+    # root.update()
+    # w.join()
+    # tkinter.messagebox.showinfo("Work Complete", "OK Done")
     
-    AWAKE = "hello assistant"
 
-    while True:
-        try:
-            print("Say '" + AWAKE + "' for response")
-            if get_audio().lower().count(AWAKE) > 0:
-                speak("Hello, I am your assistant. How can I help you?")
-                text = get_audio().lower()
-
-                for phrase in CALENDAR_STRINGS:
-                    if phrase in text:
-                        date = get_date(text)
-                        if date:
-                            get_events(date, SERVICE)
-                            break
-                        else:
-                            speak("I can't help you, without mentioning a day, please try again, with mention a day.")
-                            break
-                else:
-                    for phrase in NOTE_STRINGS:
-                        if phrase in text:
-                            speak("What would you like to me write down?")
-                            note_text = get_audio()
-                            note(note_text)
-                            speak("I have made a note of that")
-                            break      
-                    else:
-                        speak("Sorry, I can't understan, please try again")
-        except Exception as e:
-            pass
-
- 
+    
