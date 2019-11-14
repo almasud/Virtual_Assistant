@@ -23,22 +23,28 @@ def speak(text):
     engine.runAndWait()
 
 
-def get_audio():
+def get_audio(status_bar=None):
     r = sr.Recognizer()
     with sr.Microphone() as source:
         print("Listening...")
+        if status_bar:
+            status_bar["text"] = "Listening..."
         audio = r.listen(source)
         said = ""
         try:
             said = r.recognize_google(audio)
             print("You say: " + said)
+            if status_bar:
+                status_bar["text"] = "You say: " + said
         except LookupError as err:
             print("Opps! could not understand audio: " + str(err))
+            if status_bar:
+                status_bar["text"] = "Opps! could not understand audio: " + str(err)
     return said
 
 
 # Code for google calender
-def authenticate_google_calender():
+def authenticate_google_calender(message_box=None):
     """Shows basic usage of the Google Calendar API.
     Prints the start and name of the next 10 events on the user's calendar.
     """
@@ -51,15 +57,19 @@ def authenticate_google_calender():
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
-            flow = InstalledAppFlow.from_client_secrets_file(
+            if message_box.askokcancel("Calendar permisson request", "Calendar permission needed for working with your upcomming events.\nWould like to access your google calendar?"):
+                flow = InstalledAppFlow.from_client_secrets_file(
                 'credentials.json', SCOPES)
-            creds = flow.run_local_server(port=0)
+                creds = flow.run_local_server(port=0)
         # Save the credentials for the next run
         with open('token.pickle', 'wb') as token:
             pickle.dump(creds, token)
     
-    service = build('calendar', 'v3', credentials=creds)
-    return service
+    if not creds:
+        return None
+    else:
+        service = build('calendar', 'v3', credentials=creds)
+        return service
 
 
 def get_events(date, service):
