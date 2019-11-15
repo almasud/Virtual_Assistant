@@ -183,8 +183,7 @@ class Page2(Page):
             else:
                 tkinter.messagebox.showinfo("Invalid", "Only Charater, Number and ; (semicolon)  are allowed.")
         
-
-        
+       
 class MainView(Page):
     def __init__(self, root=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -271,7 +270,7 @@ class MainView(Page):
             self.status_bar["text"] = "Say '" + awake + "' for response"
             if get_audio().lower().count(awake) > 0:
                 speak("Hello, I am your assistant. How can I help you?")
-                text = get_audio(self.status_bar).lower()
+                text = get_audio(status_bar=self.status_bar).lower()
                 recognize = False
 
                 if EVENTS_REMINDER_ACTIVE or NOTE_MAKING_SERVICE:
@@ -293,7 +292,7 @@ class MainView(Page):
                             if phrase in text:
                                 recognize = True
                                 speak("What would you like to me write down?")
-                                note_text = get_audio(self.status_bar)
+                                note_text = get_audio(status_bar=self.status_bar)
                                 note(note_text)
                                 speak("I have made a note of that")
                                 break      

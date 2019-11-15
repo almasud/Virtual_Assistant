@@ -25,21 +25,28 @@ def speak(text):
 
 def get_audio(status_bar=None):
     r = sr.Recognizer()
-    with sr.Microphone() as source:
-        print("Listening...")
-        if status_bar:
-            status_bar["text"] = "Listening..."
-        audio = r.listen(source)
-        said = ""
-        try:
-            said = r.recognize_google(audio)
-            print("You say: " + said)
+    said = ""
+    try:
+        with sr.Microphone() as source:
+            print("Please wait. Calibrating your microphone...")  
+            # listen for 1 seconds and create the ambient noise energy level  
+            r.adjust_for_ambient_noise(source, duration=1)
+            print("Listening...")
             if status_bar:
-                status_bar["text"] = "You say: " + said
-        except LookupError as err:
-            print("Opps! could not understand audio: " + str(err))
-            if status_bar:
-                status_bar["text"] = "Opps! could not understand audio: " + str(err)
+                status_bar["text"] = "Listening..."
+            audio = r.listen(source)
+            try:
+                said = r.recognize_google(audio)
+                print("You say: " + said)
+                if status_bar:
+                    status_bar["text"] = "You say: " + said
+            except LookupError as err:
+                print("Opps! could not understand audio: " + str(err))
+                if status_bar:
+                    status_bar["text"] = "Opps! could not understand audio: " + str(err)
+    except Exception as e:
+        print("Microphone Exception: ", e)
+    
     return said
 
 

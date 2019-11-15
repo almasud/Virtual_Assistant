@@ -4,6 +4,7 @@ venv
 *.pickle
 *.txt
 test.py
+credentials.json
 
 
 # Created by https://www.gitignore.io/api/python
