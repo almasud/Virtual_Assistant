@@ -168,6 +168,8 @@ def get_date(text):
 
 def note(text):
     date = datetime.datetime.now()
+    if not os.path.exists('notes'):
+        os.makedirs('notes')
     file_name = "notes/" + str(date).replace(":", "-") + "-note.txt"
     with open(file_name, "w") as f:
         f.write(text)
