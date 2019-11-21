@@ -44,8 +44,8 @@ def get_audio(status_bar=None):
                 print("Opps! could not understand audio: " + str(err))
                 if status_bar:
                     status_bar["text"] = "Opps! could not understand audio: " + str(err)
-    except Exception as e:
-        print("Microphone Exception: ", e)
+    except:
+        pass
     
     return said
 

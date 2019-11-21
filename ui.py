@@ -227,14 +227,14 @@ class MainView(Page):
         self.status_bar.pack(side="bottom", fill="x", ipady=5)
 
         # Service start button
-        service_start_btn_var = tk.StringVar()
-        service_start_btn_var.set("Start Service")
-        service_start_btn = tk.Button(self.p1, textvariable=service_start_btn_var, 
+        self.service_start_btn_var = tk.StringVar()
+        self.service_start_btn_var.set("Start Service")
+        service_start_btn = tk.Button(self.p1, textvariable=self.service_start_btn_var, 
             font=("arial", 12), bg="#444", fg="#fff", cursor="hand2", command=self.service_listener)
         service_start_btn.pack(side="top", pady=25)
 
-    
     def service_listener(self):
+        self.service_start_btn_var.set("Running Service...")
         assitant_thread = threading.Thread(target = self.get_assistant)
         assitant_thread.start()
 
@@ -307,5 +307,7 @@ class MainView(Page):
                 
         except:
             pass
+        
+        self.service_start_btn_var.set("Start Service")
 
 
