@@ -26,8 +26,10 @@ pip install pytz
 pip install SpeechRecognition
 ```
 Install PyAudio (Required to work with SpeechRecognition):
-There is no wheel (prebuilt package) for Python 3.7 or above on Windows:
-We need to download pyaudio from [here](https://www.lfd.uci.edu/~gohlke/pythonlibs/#pyaudio)
+
+There is no wheel (prebuilt package) for Python 3.7 or above on Windows.
+We need to download pyaudio from [here](https://www.lfd.uci.edu/~gohlke/pythonlibs/#pyaudio).
+
 After download, just type
 ```
 pip install <downloaded file name>
