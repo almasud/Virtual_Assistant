@@ -1,18 +1,31 @@
 # Installation
-To create a virtual environment
+
+### Install Python 3
+#### For Windows
+Download Python 3 [here](https://www.python.org/ftp/python/3.8.1/python-3.8.1.exe) then install it in your computer.
+#### For Linux and MacOS
+No need to install python3 separetly. 
+To see which version of Python 3 you have already installed, open a command prompt and run 
+```python3 --version```
+
+### Install ```pip``` 
+```pip``` is a package-management system used to install and manage software packages written in Python.
+#### For windows user
+No need to install ```pip``` separetly after installing python 3.
+#### For linux user
+Open terminal (press Ctrl+Alt+T in Ubuntu) then write the command and press enter ```sudo apt install pip```
+
 ### Install virtualenv using ```pip```:
 ```
 pip install virtualenv
 ```
-
-Now, In the project root directory
+In the project root directory
 ### Create a virtual environment using ```virtualenv```:
 ```
 virtualenv venv
 ```
 ```venv``` can be any name.
 
-Now it's time to active the vrtual environment
 ### Active virtual environment ```venv```:
 In the project root directory type:
 #### For Windows:
