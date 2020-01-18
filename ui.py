@@ -3,6 +3,7 @@ import tkinter.messagebox
 import re
 import configparser
 import threading
+import datetime
 from functions import (
     authenticate_google_calender, get_audio, speak, note,
     get_date, get_events
@@ -272,14 +273,24 @@ class MainView(Page):
                 speak("Hello, I am your assistant. How can I help you?")
                 text = get_audio(status_bar=self.status_bar).lower()
                 recognize = False
+                today = datetime.date.today()
 
                 if EVENTS_REMINDER_ACTIVE or NOTE_MAKING_SERVICE:
                     if EVENTS_REMINDER_ACTIVE:
                         for phrase in events_reminder_strings:
                             if phrase in text:
                                 recognize = True
-                                date = get_date(text)
+                                try:
+                                    date = get_date(text)
+                                except ValueError:
+                                    speak("Sorry, It's not a valid date, Please try again with a valid date.")
+                                    self.status_bar["text"] = "Sorry, It's not a valid date! Please try again with a valid date."
+                                    break
                                 if date:
+                                    if date < today:
+                                        speak("Sorry, you have mentioned a past day, Please mention an upcoming day.")
+                                        self.status_bar["text"] = "Sorry, you have mentioned a past day! Please mention an upcoming day."
+                                        break
                                     get_events(date, SERVICE)
                                     break
                                 else:

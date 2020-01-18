@@ -138,7 +138,7 @@ def get_date(text):
             day = int(word)
         else:
             for ext in DAY_EXTENSIOS:
-                found = word.find(ext)  # ex. 5th
+                found = word.find(ext)  # ex. 12th
                 if found > 0:
                     try:
                         day = int(word[:found])
