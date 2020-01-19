@@ -11,26 +11,42 @@ import pyttsx3
 import speech_recognition as sr
 import pytz
 import subprocess
+import webbrowser
+import urllib.request
+import urllib.parse
+import re
 
 SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
 MONTHS = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"]
 DAYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
 DAY_EXTENSIOS = ["rd", "th", "st"]
 
+# For check wheather an internet connection exists or not
+def is_internet():
+    try:
+        urllib.request.urlopen('https://google.com', timeout=1)
+        return True
+    except urllib.request.URLError: 
+        return False
+
+# For audio from text input
 def speak(text):
     engine = pyttsx3.init()
     engine.say(text)
     engine.runAndWait()
 
-
+# For text from audio input
 def get_audio(status_bar=None):
     r = sr.Recognizer()
     said = ""
     try:
         with sr.Microphone() as source:
-            print("Please wait. Calibrating your microphone...")  
+            print("Please wait. Calibrating your microphone...")
+            if status_bar:
+                status_bar["text"] = "Please wait. Calibrating your microphone..."
             # listen for 1 seconds and create the ambient noise energy level  
             r.adjust_for_ambient_noise(source, duration=1)
+            # Listen from audio source
             print("Listening...")
             if status_bar:
                 status_bar["text"] = "Listening..."
@@ -50,7 +66,7 @@ def get_audio(status_bar=None):
     return said
 
 
-# Code for google calender
+# For google calendar authentication service
 def authenticate_google_calender(message_box=None):
     """Shows basic usage of the Google Calendar API.
     Prints the start and name of the next 10 events on the user's calendar.
@@ -78,8 +94,8 @@ def authenticate_google_calender(message_box=None):
         service = build('calendar', 'v3', credentials=creds)
         return service
 
-
-def get_events(date, service):
+# For events from google calendar
+def get_events(date, service, status_bar=None):
     # Call the Calendar API
     start_date = datetime.datetime.combine(date, datetime.datetime.min.time())  # Ex. 2019-11-07 00:00:00
     end_date = datetime.datetime.combine(date, datetime.datetime.max.time())  # Ex. 2019-11-07 23:59:59.999999
@@ -91,6 +107,9 @@ def get_events(date, service):
 
     if not events:
         speak('Sorry, You have no upcoming events on this day.')
+        if status_bar:
+            status_bar["text"] = "Sorry, You have no upcoming events on this day."
+            
     else:
         event_num = len(events)
         if event_num > 1:
@@ -116,7 +135,7 @@ def get_events(date, service):
 
             speak(event['summary'] + ", at " + start_time)
 
-
+# For a date that contains in a string
 def get_date(text):
     text = text.lower()
     today = datetime.date.today()
@@ -165,8 +184,8 @@ def get_date(text):
 
     return datetime.date(month=month, day=day, year=year)
 
-
-def note(text):
+# For make a note from text input
+def make_note(text):
     date = datetime.datetime.now()
     if not os.path.exists('notes'):
         os.makedirs('notes')
@@ -175,3 +194,23 @@ def note(text):
         f.write(text)
 
     subprocess.Popen(["notepad.exe", file_name])
+
+# For playing a song from online (Youtube)
+def play_from_online(text, status_bar=None):
+    # song name from user
+    song = urllib.parse.urlencode({"search_query" : text})
+    print(song)
+
+    # fetch the ?v=query_string
+    result = urllib.request.urlopen("http://www.youtube.com/results?" + song)
+
+    # make the url of the first result song
+    search_results = re.findall(r'href=\"\/watch\?v=(.{11})', result.read().decode())  # 11 is the number of characters of each video
+    print(search_results)
+
+    # make the final url of song selects the very first result from youtube result
+    url = "http://www.youtube.com/watch?v="+search_results[0]
+
+    # play the song using webBrowser module which opens the browser 
+    # webbrowser.open(url, new = 1)
+    webbrowser.open_new(url)

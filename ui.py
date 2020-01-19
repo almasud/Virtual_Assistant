@@ -5,88 +5,118 @@ import configparser
 import threading
 import datetime
 from functions import (
-    authenticate_google_calender, get_audio, speak, note,
-    get_date, get_events
+    authenticate_google_calender, get_audio, speak, make_note,
+    get_date, get_events, is_internet, play_from_online
 )
 
-EVENTS_REMINDER_ACTIVE = False
+EVENTS_REMINDER_SERVICE = False
 NOTE_MAKING_SERVICE = False
+MUSIC_PLAYING_SERVICE = False
+
+# For displaying a popup window that contains an error message
+def show_error_message(title, message):
+    tkinter.messagebox.showerror(title, message)
+
 
 class Page(tk.Frame):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
     def show(self):
+        # lift a particular window above the others
         self.lift()
 
 
 class Page1(Page):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.events_reminder_active_var = tk.IntVar()
-        self.note_active_var = tk.IntVar()
+        self.events_reminder_service_var = tk.IntVar()
+        self.note_making_service_var = tk.IntVar()
+        self.music_playing_service_var = tk.IntVar()
 
         service_label = tk.Label(self, text="Active Services", font=(16))
         services_frame = tk.Frame(self)
-        self.events_reminder_active_btn = tk.Checkbutton(services_frame, 
-            variable=self.events_reminder_active_var, command=self.active_service, 
+        self.events_reminder_service_checkbox = tk.Checkbutton(services_frame, 
+            variable=self.events_reminder_service_var, command=self.active_service, 
             text="Events Reminder")
-        self.note_active_btn = tk.Checkbutton(services_frame,  
-            variable=self.note_active_var, command=self.active_service,  
+        self.note_making_service_checkbox = tk.Checkbutton(services_frame,  
+            variable=self.note_making_service_var, command=self.active_service,  
             text="Note Making")
+        self.music_playing_service_checkbox = tk.Checkbutton(services_frame,  
+            variable=self.music_playing_service_var, command=self.active_service,  
+            text="Music Playing")
 
         # Displaying the views
         service_label.pack(side="top", pady=5)
         services_frame.pack(side="top")
-        self.events_reminder_active_btn.pack(side="left")
-        self.note_active_btn.pack(side="left")
+        self.events_reminder_service_checkbox.pack(side="left")
+        self.note_making_service_checkbox.pack(side="left")
+        self.music_playing_service_checkbox.pack(side="left")
 
         self.initiate_service()
 
     def initiate_service(self):
-        global EVENTS_REMINDER_ACTIVE
+        global EVENTS_REMINDER_SERVICE
         global NOTE_MAKING_SERVICE
+        global MUSIC_PLAYING_SERVICE
         config = configparser.ConfigParser()
         
         # Get data from files
         if bool(config.read("config.ini")):
             if bool(int(config.get("DEFAULT", "events_reminder_service"))):
-                self.events_reminder_active_var.set(True)
-                EVENTS_REMINDER_ACTIVE = True
+                self.events_reminder_service_var.set(1)
+                EVENTS_REMINDER_SERVICE = True
             else:
-                self.events_reminder_active_var.set(False)
+                self.events_reminder_service_var.set(0)
 
             if bool(int(config.get("DEFAULT", "note_making_service"))):
-                self.note_active_var.set(True)
+                self.note_making_service_var.set(1)
                 NOTE_MAKING_SERVICE = True
             else:
-                self.note_active_var.set(False)
+                self.note_making_service_var.set(0)
+
+            if bool(int(config.get("DEFAULT", "music_playing_service"))):
+                self.music_playing_service_var.set(1)
+                MUSIC_PLAYING_SERVICE = True
+            else:
+                self.music_playing_service_var.set(0)
         else:
-            config['DEFAULT'] = {'events_reminder_service': "1", 
-                'note_making_service': "1"}
+            config['DEFAULT'] = {
+                'events_reminder_service': "1", 
+                'note_making_service': "1", 
+                'music_playing_service': "1"
+            }
             # Write into config file        
             with open('config.ini', 'w') as configfile:
                 config.write(configfile)
     
     def active_service(self):
-        global EVENTS_REMINDER_ACTIVE
+        global EVENTS_REMINDER_SERVICE
         global NOTE_MAKING_SERVICE
+        global MUSIC_PLAYING_SERVICE
         config = configparser.ConfigParser()
         config.read("config.ini")
 
-        if self.events_reminder_active_var.get():
+        if self.events_reminder_service_var.get():
             config["DEFAULT"]["events_reminder_service"] = "1"
-            EVENTS_REMINDER_ACTIVE = True
+            EVENTS_REMINDER_SERVICE = True
         else:
             config["DEFAULT"]["events_reminder_service"] = "0"
-            EVENTS_REMINDER_ACTIVE = False
+            EVENTS_REMINDER_SERVICE = False
 
-        if self.note_active_var.get():
+        if self.note_making_service_var.get():
             config["DEFAULT"]["note_making_service"] = "1"
             NOTE_MAKING_SERVICE = True
         else:
             config["DEFAULT"]["note_making_service"] = "0"
             NOTE_MAKING_SERVICE = False
+        
+        if self.music_playing_service_var.get():
+            config["DEFAULT"]["music_playing_service"] = "1"
+            MUSIC_PLAYING_SERVICE = True
+        else:
+            config["DEFAULT"]["music_playing_service"] = "0"
+            MUSIC_PLAYING_SERVICE = False
 
         # Write into config file        
         with open('config.ini', 'w') as configfile:
@@ -96,15 +126,18 @@ class Page1(Page):
 class Page2(Page):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.assistant_strings_var = tk.StringVar()
         self.events_reminder_strings_var = tk.StringVar()
         self.note_making_strings_var = tk.StringVar()
-        self.assistant_strings_var = tk.StringVar()
+        self.music_playing_strings_var = tk.StringVar()
+        # Call the response_strings_form when Page2 initialized
         self.response_strings_form()
         
     def response_strings_form(self):
         assistant_strings_file = ""
         events_reminder_strings_file = ""
         note_making_strings_file = ""
+        music_playing_strings_file = ""
 
         # Get data from files
         try:
@@ -116,6 +149,9 @@ class Page2(Page):
 
             with open("note_making_strings.txt", "r") as file:
                 note_making_strings_file = file.read()
+
+            with open("music_playing_strings.txt", "r") as file:
+                music_playing_strings_file = file.read()
         except:
             pass
 
@@ -134,6 +170,11 @@ class Page2(Page):
             with open("note_making_strings.txt", "w") as file:
                 file.write("make a note;write this down;remember this")
         self.note_making_strings_var.set(note_making_strings_file)
+
+        if len(music_playing_strings_file) == 0:
+            with open("music_playing_strings.txt", "w") as file:
+                file.write("play a music;play a song;play music;play song;music play;song play")
+        self.music_playing_strings_var.set(music_playing_strings_file)
         
         # Response strings for assistant service
         assistant_str_label = tk.Label(self, text="Assistant Response", 
@@ -159,6 +200,14 @@ class Page2(Page):
             textvariable=self.note_making_strings_var, fg="#fff", bd=1, bg="#444")
         note_str_entry.grid(row=3, column=1, ipady=5, pady=5)
         
+        # Response strings for Music Playing service
+        music_str_label = tk.Label(self, text="Music Playing Response", 
+            font=("arial", 10, "bold"), fg="blue")
+        music_str_label.grid(row=3, sticky="E")
+        music_str_entry = tk.Entry(self, width=30, font=("arial", 12), 
+            textvariable=self.music_playing_strings_var, fg="#fff", bd=1, bg="#444")
+        music_str_entry.grid(row=3, column=1, ipady=5, pady=5)
+        
         # Save Button
         save_btn = tk.Button(self, text="Save", font=("arial", 12), 
             bg="#444", fg="#fff", command=self.save_strings, cursor="hand2")
@@ -168,18 +217,28 @@ class Page2(Page):
         assist_str = self.assistant_strings_var.get()
         cal_str = self.events_reminder_strings_var.get()
         note_str = self.note_making_strings_var.get()
+        music_str = self.music_playing_strings_var.get()
 
-        if assist_str == "" or cal_str == "" or note_str == "":
+        if (assist_str == "" 
+            or cal_str == "" 
+            or note_str == "" 
+            or music_str == ""
+        ):
             tkinter.messagebox.showinfo("Invalid", "Field cannot be empty.")
         else:
             pattern = r"^[a-zA-Z]+[0-9;\s]*"
-            if re.match(pattern, cal_str) and re.match(pattern, note_str):
+            if (re.match(pattern, cal_str) 
+                and re.match(pattern, note_str) 
+                and re.match(pattern, music_str)
+            ):
                 with open("assistant_strings.txt", "w") as file:
                     file.write(assist_str)
                 with open("events_reminder_strings.txt", "w") as file:
                     file.write(cal_str)
                 with open("note_making_strings.txt", "w") as file:
                     file.write(note_str)
+                with open("music_playing_strings.txt", "w") as file:
+                    file.write(music_str)
                 tkinter.messagebox.showinfo("Success", "Records are successfully saved.")
             else:
                 tkinter.messagebox.showinfo("Invalid", "Only Charater, Number and ; (semicolon)  are allowed.")
@@ -216,7 +275,7 @@ class MainView(Page):
         label.pack(side="top")
 
         # Code for container Frame
-        # Back button for Page 1 in Page 2
+        # Button for back to Page 1 from Page 2
         back_btn = tk.Button(self.p2, text="<= Back", fg="#fff", bg="#444",
             command=self.p1.show, font=("arial", 10, "bold"), cursor="hand2")
         back_btn.grid(row=0)
@@ -234,49 +293,84 @@ class MainView(Page):
             font=("arial", 12), bg="#444", fg="#fff", cursor="hand2", command=self.service_listener)
         service_start_btn.pack(side="top", pady=25)
 
+        # Assistant respone text lable
+        response_text = ""
+        with open("assistant_strings.txt", "r") as file:
+            response_text = file.read()
+        assistant_response_var = tk.StringVar()
+        assistant_response_var.set("Say, \"" + response_text + "\" for response.")
+        self.assistant_response_label = tk.Label(self.p1, textvariable=assistant_response_var, font=("arial", 12), fg="#444444")
+
     def service_listener(self):
-        self.service_start_btn_var.set("Running Service...")
-        assitant_thread = threading.Thread(target = self.get_assistant)
-        assitant_thread.start()
+        if (EVENTS_REMINDER_SERVICE 
+            or NOTE_MAKING_SERVICE 
+            or MUSIC_PLAYING_SERVICE
+        ):
+            self.service_start_btn_var.set("Running Service...")
+            self.assistant_response_label.pack(side="top", pady=26)
+            # Start services in background thread to free UI thread
+            assitant_thread = threading.Thread(target = self.get_assistant)
+            assitant_thread.start()
+            
+        else:
+            show_error_message("Invalid operation", "Sorry, You have no any active service.\nPlease active at least one service.")
+            self.status_bar["text"] = "Sorry, You have no any active service, Please active at least one service."
 
     def get_assistant(self):
-        global EVENTS_REMINDER_ACTIVE
+        global EVENTS_REMINDER_SERVICE
         global NOTE_MAKING_SERVICE
+        global MUSIC_PLAYING_SERVICE
+        awake = ""
         events_reminder_strings = []
         note_making_strings = []
-        awake = ""
+        music_playing_strings = []
         
-        if EVENTS_REMINDER_ACTIVE:
-            SERVICE = authenticate_google_calender(message_box=tkinter.messagebox)
-            if not SERVICE:
-                config = configparser.ConfigParser()
-                config.read("config.ini")
-                if self.p1.events_reminder_active_var.get():
-                    self.p1.events_reminder_active_var.set(False)
-                    EVENTS_REMINDER_ACTIVE = False
-                    config["DEFAULT"]["events_reminder_service"] = "0"
-                    # Write into config file        
-                    with open('config.ini', 'w') as configfile:
-                        config.write(configfile)
+        if (not is_internet() 
+            and (EVENTS_REMINDER_SERVICE 
+                    or NOTE_MAKING_SERVICE 
+                    or MUSIC_PLAYING_SERVICE
+                )
+            ):
+            show_error_message(title="Connection error", message="Services are activated that required an internet connection.")
+            self.status_bar["text"] = "Sorry, Services are activated that required an internet connection."
+            # Disable all activated services.
+            config = configparser.ConfigParser()
+            config.read("config.ini")
+            if self.p1.events_reminder_service_var.get():
+                self.p1.events_reminder_service_var.set(False)
+                EVENTS_REMINDER_SERVICE = False
+                config["DEFAULT"]["events_reminder_service"] = "0"
+            if self.p1.note_making_service_var.get():
+                self.p1.note_making_service_var.set(False)
+                NOTE_MAKING_SERVICE = False
+                config["DEFAULT"]["note_making_service"] = "0"
+            if self.p1.music_playing_service_var.get():
+                self.p1.music_playing_service_var.set(False)
+                MUSIC_PLAYING_SERVICE = False
+                config["DEFAULT"]["music_playing_service"] = "0"
+            # Write into config file        
+            with open('config.ini', 'w') as configfile:
+                config.write(configfile)
+        else:
+            with open("events_reminder_strings.txt", "r") as file:
+                events_reminder_strings = file.read().split(";")
+            with open("note_making_strings.txt", "r") as file:
+                note_making_strings = file.read().split(";")
+            with open("music_playing_strings.txt", "r") as file:
+                music_playing_strings = file.read().split(";")
+            with open("assistant_strings.txt", "r") as file:
+                awake = file.read()
 
-        with open("events_reminder_strings.txt", "r") as file:
-            events_reminder_strings = file.read().split(";")
-        with open("note_making_strings.txt", "r") as file:
-            note_making_strings = file.read().split(";")
-        with open("assistant_strings.txt", "r") as file:
-            awake = file.read()
+            try:
+                print("Say '" + awake + "' for response")
+                self.status_bar["text"] = "Say '" + awake + "' for response"
+                if get_audio(status_bar=self.status_bar).lower().count(awake) > 0:
+                    speak("Hello, I am your assistant. How can I help you?")
+                    text = get_audio(status_bar=self.status_bar).lower()
+                    recognize = False
+                    today = datetime.date.today()
 
-        try:
-            print("Say '" + awake + "' for response")
-            self.status_bar["text"] = "Say '" + awake + "' for response"
-            if get_audio().lower().count(awake) > 0:
-                speak("Hello, I am your assistant. How can I help you?")
-                text = get_audio(status_bar=self.status_bar).lower()
-                recognize = False
-                today = datetime.date.today()
-
-                if EVENTS_REMINDER_ACTIVE or NOTE_MAKING_SERVICE:
-                    if EVENTS_REMINDER_ACTIVE:
+                    if EVENTS_REMINDER_SERVICE:
                         for phrase in events_reminder_strings:
                             if phrase in text:
                                 recognize = True
@@ -291,7 +385,8 @@ class MainView(Page):
                                         speak("Sorry, you have mentioned a past day, Please mention an upcoming day.")
                                         self.status_bar["text"] = "Sorry, you have mentioned a past day! Please mention an upcoming day."
                                         break
-                                    get_events(date, SERVICE)
+                                    SERVICE = authenticate_google_calender(message_box=tkinter.messagebox)
+                                    get_events(date, SERVICE, status_bar=self.status_bar)
                                     break
                                 else:
                                     speak("I can't help you, without mentioning a day, please try again, with mention a day.")
@@ -304,20 +399,24 @@ class MainView(Page):
                                 recognize = True
                                 speak("What would you like to me write down?")
                                 note_text = get_audio(status_bar=self.status_bar)
-                                note(note_text)
+                                make_note(note_text)
                                 speak("I have made a note of that")
+                                break
+
+                    if MUSIC_PLAYING_SERVICE:
+                        for phrase in music_playing_strings:
+                            if phrase in text:
+                                recognize = True
+                                speak("What would you like to play?")
+                                music_text = get_audio(status_bar=self.status_bar)
+                                play_from_online(music_text, status_bar=self.status_bar)
                                 break      
                             
                     if not recognize:
                         speak("Sorry, I can't understan, Please try again")
-                        self.status_bar["text"] += ", Couldn't understant! Please try again"
-                
-                else:
-                    speak("Sorry, You have no any active service, Please active at least one service")
-                    self.status_bar["text"] = "Sorry, You have no any active service, Please active at least one service"
-                
-        except:
-            pass
+                        self.status_bar["text"] += ", Couldn't understant! Please try again"        
+            except:
+                pass
         
         self.service_start_btn_var.set("Start Service")
 
