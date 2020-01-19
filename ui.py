@@ -176,42 +176,47 @@ class Page2(Page):
                 file.write("play a music;play a song;play music;play song;music play;song play")
         self.music_playing_strings_var.set(music_playing_strings_file)
         
-        # Response strings for assistant service
-        assistant_str_label = tk.Label(self, text="Assistant Response", 
-            font=("arial", 10, "bold"), fg="blue")
-        assistant_str_label.grid(row=1, sticky="E")
-        assistant_str_entry = tk.Entry(self, width=30, font=("arial", 12), 
-            textvariable=self.assistant_strings_var, fg="#fff", bd=1, bg="#444")
-        assistant_str_entry.grid(row=1, column=1, ipady=5, pady=5)
+        # Response strings for Services
+        response_str_label = tk.Label(self, text="Response strings of Services", 
+            font=("arial", 12, "bold", "italic"), fg="blue")
+        response_str_label.grid(row=1, columnspan=2, pady=5)
 
-        # Response strings for events reminder service
-        events_reminder_str_label = tk.Label(self, text="Events Reminder Response", 
-            font=("arial", 10, "bold"), fg="blue")
-        events_reminder_str_label.grid(row=2, sticky="E")
-        events_reminder_str_entry = tk.Entry(self, width=30, font=("arial", 12), 
-            textvariable=self.events_reminder_strings_var, fg="#fff", bd=1, bg="#444")
-        events_reminder_str_entry.grid(row=2, column=1, ipady=5, pady=5)
+        #  Assistant service response strings
+        assistant_str_label = tk.Label(self, text="Assistant", 
+            font=("arial", 10, "bold"), fg="#444")
+        assistant_str_label.grid(row=2, sticky="W", padx=5)
+        assistant_str_entry = tk.Entry(self, width=35, font=("arial", 12), 
+            textvariable=self.assistant_strings_var, fg="#444", bd=1, bg="#fff")
+        assistant_str_entry.grid(row=2, column=1, ipady=5, pady=5)
 
-        # Response strings for Note Making service
-        note_str_label = tk.Label(self, text="Note Making Response", 
-            font=("arial", 10, "bold"), fg="blue")
-        note_str_label.grid(row=3, sticky="E")
-        note_str_entry = tk.Entry(self, width=30, font=("arial", 12), 
-            textvariable=self.note_making_strings_var, fg="#fff", bd=1, bg="#444")
-        note_str_entry.grid(row=3, column=1, ipady=5, pady=5)
+        # Events reminder service response strings
+        events_reminder_str_label = tk.Label(self, text="Events Reminder", 
+            font=("arial", 10, "bold"), fg="#444")
+        events_reminder_str_label.grid(row=3, sticky="W", padx=5)
+        events_reminder_str_entry = tk.Entry(self, width=35, font=("arial", 12), 
+            textvariable=self.events_reminder_strings_var, fg="#444", bd=1, bg="#fff")
+        events_reminder_str_entry.grid(row=3, column=1, ipady=5, pady=5)
+
+        # Note Making service response strings
+        note_str_label = tk.Label(self, text="Note Making", 
+            font=("arial", 10, "bold"), fg="#444")
+        note_str_label.grid(row=4, sticky="W", padx=5)
+        note_str_entry = tk.Entry(self, width=35, font=("arial", 12), 
+            textvariable=self.note_making_strings_var, fg="#444", bd=1, bg="#fff")
+        note_str_entry.grid(row=4, column=1, ipady=5, pady=5)
         
-        # Response strings for Music Playing service
-        music_str_label = tk.Label(self, text="Music Playing Response", 
-            font=("arial", 10, "bold"), fg="blue")
-        music_str_label.grid(row=3, sticky="E")
-        music_str_entry = tk.Entry(self, width=30, font=("arial", 12), 
-            textvariable=self.music_playing_strings_var, fg="#fff", bd=1, bg="#444")
-        music_str_entry.grid(row=3, column=1, ipady=5, pady=5)
+        # Music Playing service response strings
+        music_str_label = tk.Label(self, text="Music Playing", 
+            font=("arial", 10, "bold"), fg="#444")
+        music_str_label.grid(row=5, sticky="W", padx=5)
+        music_str_entry = tk.Entry(self, width=35, font=("arial", 12), 
+            textvariable=self.music_playing_strings_var, fg="#444", bd=1, bg="#fff")
+        music_str_entry.grid(row=5, column=1, ipady=5, pady=5)
         
         # Save Button
         save_btn = tk.Button(self, text="Save", font=("arial", 12), 
             bg="#444", fg="#fff", command=self.save_strings, cursor="hand2")
-        save_btn.grid(row=4, columnspan=2)
+        save_btn.grid(row=6, columnspan=2)
 
     def save_strings(self):
         assist_str = self.assistant_strings_var.get()
