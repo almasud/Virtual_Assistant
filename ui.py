@@ -391,7 +391,11 @@ class MainView(Page):
                                         self.status_bar["text"] = "Sorry, you have mentioned a past day! Please mention an upcoming day."
                                         break
                                     SERVICE = authenticate_google_calender(message_box=tkinter.messagebox)
-                                    get_events(date, SERVICE, status_bar=self.status_bar)
+                                    if SERVICE:
+                                        get_events(date, SERVICE, status_bar=self.status_bar)
+                                    else:
+                                        speak("Sorry, I can not read your calendar, Please give the permission first.")
+                                        self.status_bar["text"] += ", Sorry, I can't read your Calendar! Please give the permission first."
                                     break
                                 else:
                                     speak("I can't help you, without mentioning a day, please try again, with mention a day.")

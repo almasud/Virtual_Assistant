@@ -65,7 +65,6 @@ def get_audio(status_bar=None):
     
     return said
 
-
 # For google calendar authentication service
 def authenticate_google_calender(message_box=None):
     """Shows basic usage of the Google Calendar API.
@@ -80,10 +79,13 @@ def authenticate_google_calender(message_box=None):
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
+            speak("Calendar permission needed, for working with your, upcomming events, Would you like to, access your google calendar?")
             if message_box.askokcancel("Calendar permisson request", "Calendar permission needed for working with your upcomming events.\nWould like to access your google calendar?"):
                 flow = InstalledAppFlow.from_client_secrets_file(
                 'credentials.json', SCOPES)
                 creds = flow.run_local_server(port=0)
+            else:
+                return None
         # Save the credentials for the next run
         with open('token.pickle', 'wb') as token:
             pickle.dump(creds, token)
@@ -202,14 +204,14 @@ def play_from_online(text, status_bar=None):
     print(song)
 
     # fetch the ?v=query_string
-    result = urllib.request.urlopen("http://www.youtube.com/results?" + song)
+    result = urllib.request.urlopen("https://www.youtube.com/results?" + song)
 
     # make the url of the first result song
     search_results = re.findall(r'href=\"\/watch\?v=(.{11})', result.read().decode())  # 11 is the number of characters of each video
     print(search_results)
 
     # make the final url of song selects the very first result from youtube result
-    url = "http://www.youtube.com/watch?v="+search_results[0]
+    url = "https://www.youtube.com/watch?v="+search_results[0]
 
     # play the song using webBrowser module which opens the browser 
     # webbrowser.open(url, new = 1)
