@@ -5,7 +5,7 @@ venv
 *.txt
 test.py
 credentials.json
-
+private_keys.py
 
 # Created by https://www.gitignore.io/api/python
 # Edit at https://www.gitignore.io/?templates=python

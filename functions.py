@@ -199,6 +199,9 @@ def make_note(text):
 
 # For playing a song from online (Youtube)
 def play_from_online(text, status_bar=None):
+    os.add_dll_directory(r'C:\Program Files (x86)\VideoLAN\VLC')
+    import vlc, pafy
+
     # song name from user
     song = urllib.parse.urlencode({"search_query" : text})
     print(song)
@@ -213,6 +216,12 @@ def play_from_online(text, status_bar=None):
     # make the final url of song selects the very first result from youtube result
     url = "https://www.youtube.com/watch?v="+search_results[0]
 
-    # play the song using webBrowser module which opens the browser 
-    # webbrowser.open(url, new = 1)
-    webbrowser.open_new(url)
+    # Play the song using vlc and pafy (dependency youtube-dl module) 
+    # modules which opens the video
+    video = pafy.new(url)
+    best = video.getbest()
+    media = vlc.MediaPlayer(best.url)
+    media.play()
+    # Take time to open vlc
+    while not media.is_playing():
+        time.sleep(1)

@@ -54,6 +54,21 @@ pip install pyttsx3
 pyttsx3 is a Text to Speech (TTS) library for Python 2 and 3. Works without internet connection 
 or delay. Supports multiple TTS engines, including Sapi5, nsss, and espeak.
 
+```
+pip install python-vlc 
+```
+This module provides ctypes-based bindings for the native libvlc API of the VLC video player. Note that it relies on an already present install of VLC.
+
+```
+pip install pafy
+```
+Retrieve YouTube content and metadata. Retrieve the URL to stream the video in a vlc player.
+ 
+For pafy dependancy
+```
+pip install --upgrade youtube_dl
+```
+
 #### Then install the Google client library:
 ``` 
 pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib
