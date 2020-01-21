@@ -5,13 +5,14 @@ import configparser
 import threading
 import datetime
 from functions import (
-    authenticate_google_calender, get_audio, speak, make_note,
-    get_date, get_events, is_internet, play_from_online
+    authenticate_google_calender, get_audio, speak, make_note, get_date, 
+    get_events, is_internet, play_from_online, query_from_online
 )
 
 EVENTS_REMINDER_SERVICE = False
 NOTE_MAKING_SERVICE = False
 MUSIC_PLAYING_SERVICE = False
+QUERY_SERVICE = False
 
 # For displaying a popup window that contains an error message
 def show_error_message(title, message):
@@ -33,6 +34,7 @@ class Page1(Page):
         self.events_reminder_service_var = tk.IntVar()
         self.note_making_service_var = tk.IntVar()
         self.music_playing_service_var = tk.IntVar()
+        self.query_service_var = tk.IntVar()
 
         service_label = tk.Label(self, text="Active Services", font=(16))
         services_frame = tk.Frame(self)
@@ -45,6 +47,9 @@ class Page1(Page):
         self.music_playing_service_checkbox = tk.Checkbutton(services_frame,  
             variable=self.music_playing_service_var, command=self.active_service,  
             text="Music Playing")
+        self.query_service_checkbox = tk.Checkbutton(services_frame, 
+            variable=self.query_service_var, command=self.active_service, 
+            text="Query Service")
 
         # Displaying the views
         service_label.pack(side="top", pady=5)
@@ -52,6 +57,7 @@ class Page1(Page):
         self.events_reminder_service_checkbox.pack(side="left")
         self.note_making_service_checkbox.pack(side="left")
         self.music_playing_service_checkbox.pack(side="left")
+        self.query_service_checkbox.pack(side="left")
 
         self.initiate_service()
 
@@ -59,6 +65,7 @@ class Page1(Page):
         global EVENTS_REMINDER_SERVICE
         global NOTE_MAKING_SERVICE
         global MUSIC_PLAYING_SERVICE
+        global QUERY_SERVICE
         config = configparser.ConfigParser()
         
         # Get data from files
@@ -80,11 +87,18 @@ class Page1(Page):
                 MUSIC_PLAYING_SERVICE = True
             else:
                 self.music_playing_service_var.set(0)
+            
+            if bool(int(config.get("DEFAULT", "query_service"))):
+                self.query_service_var.set(1)
+                QUERY_SERVICE = True
+            else:
+                self.query_service_var.set(0)
         else:
             config['DEFAULT'] = {
                 'events_reminder_service': "1", 
                 'note_making_service': "1", 
-                'music_playing_service': "1"
+                'music_playing_service': "1",
+                'query_service': "1"
             }
             # Write into config file        
             with open('config.ini', 'w') as configfile:
@@ -94,6 +108,7 @@ class Page1(Page):
         global EVENTS_REMINDER_SERVICE
         global NOTE_MAKING_SERVICE
         global MUSIC_PLAYING_SERVICE
+        global QUERY_SERVICE
         config = configparser.ConfigParser()
         config.read("config.ini")
 
@@ -118,6 +133,13 @@ class Page1(Page):
             config["DEFAULT"]["music_playing_service"] = "0"
             MUSIC_PLAYING_SERVICE = False
 
+        if self.query_service_var.get():
+            config["DEFAULT"]["query_service"] = "1"
+            QUERY_SERVICE = True
+        else:
+            config["DEFAULT"]["query_service"] = "0"
+            QUERY_SERVICE = False
+
         # Write into config file        
         with open('config.ini', 'w') as configfile:
             config.write(configfile)
@@ -130,6 +152,7 @@ class Page2(Page):
         self.events_reminder_strings_var = tk.StringVar()
         self.note_making_strings_var = tk.StringVar()
         self.music_playing_strings_var = tk.StringVar()
+        self.query_service_strings_var = tk.StringVar()
         # Call the response_strings_form when Page2 initialized
         self.response_strings_form()
         
@@ -138,6 +161,7 @@ class Page2(Page):
         events_reminder_strings_file = ""
         note_making_strings_file = ""
         music_playing_strings_file = ""
+        query_service_strings_file = ""
 
         # Get data from files
         try:
@@ -152,6 +176,9 @@ class Page2(Page):
 
             with open("music_playing_strings.txt", "r") as file:
                 music_playing_strings_file = file.read()
+
+            with open("query_service_strings.txt", "r") as file:
+                query_service_strings_file = file.read()
         except:
             pass
 
@@ -175,10 +202,15 @@ class Page2(Page):
             with open("music_playing_strings.txt", "w") as file:
                 file.write("play a music;play a song;play music;play song;music play;song play")
         self.music_playing_strings_var.set(music_playing_strings_file)
+
+        if len(query_service_strings_file) == 0:
+            with open("query_service_strings.txt", "w") as file:
+                file.write("tell me;tell something;query something;want to know")
+        self.query_service_strings_var.set(query_service_strings_file)
         
         # Response strings for Services
         response_str_label = tk.Label(self, text="Response strings of Services", 
-            font=("arial", 12, "bold", "italic"), fg="blue")
+            font=("arial", 12), fg="#444")
         response_str_label.grid(row=1, columnspan=2, pady=5)
 
         #  Assistant service response strings
@@ -212,29 +244,41 @@ class Page2(Page):
         music_str_entry = tk.Entry(self, width=35, font=("arial", 12), 
             textvariable=self.music_playing_strings_var, fg="#444", bd=1, bg="#fff")
         music_str_entry.grid(row=5, column=1, ipady=5, pady=5)
+
+        #  Query service response strings
+        query_service_str_label = tk.Label(self, text="Query Service", 
+            font=("arial", 10, "bold"), fg="#444")
+        query_service_str_label.grid(row=6, sticky="W", padx=5)
+        query_service_str_entry = tk.Entry(self, width=35, font=("arial", 12), 
+            textvariable=self.query_service_strings_var, fg="#444", bd=1, bg="#fff")
+        query_service_str_entry.grid(row=6, column=1, ipady=5, pady=5)
         
         # Save Button
         save_btn = tk.Button(self, text="Save", font=("arial", 12), 
             bg="#444", fg="#fff", command=self.save_strings, cursor="hand2")
-        save_btn.grid(row=6, columnspan=2)
+        save_btn.grid(row=7, columnspan=2)
 
     def save_strings(self):
         assist_str = self.assistant_strings_var.get()
         cal_str = self.events_reminder_strings_var.get()
         note_str = self.note_making_strings_var.get()
         music_str = self.music_playing_strings_var.get()
+        query_str = self.query_service_strings_var.get()
 
-        if (assist_str == "" 
+        if (assist_str == ""
             or cal_str == "" 
             or note_str == "" 
             or music_str == ""
+            or query_str == "" 
         ):
-            tkinter.messagebox.showinfo("Invalid", "Field cannot be empty.")
+            show_error_message("Invalid", "Field cannot be empty.")
         else:
-            pattern = r"^[a-zA-Z]+[0-9;\s]*"
+            # Validate all fields except Assistant String
+            pattern = r"^[a-zA-Z][a-zA-Z\s;]*[a-zA-Z]$"
             if (re.match(pattern, cal_str) 
                 and re.match(pattern, note_str) 
                 and re.match(pattern, music_str)
+                and re.match(pattern, query_str)
             ):
                 with open("assistant_strings.txt", "w") as file:
                     file.write(assist_str)
@@ -244,9 +288,11 @@ class Page2(Page):
                     file.write(note_str)
                 with open("music_playing_strings.txt", "w") as file:
                     file.write(music_str)
+                with open("query_service_strings.txt", "w") as file:
+                    file.write(query_str)
                 tkinter.messagebox.showinfo("Success", "Records are successfully saved.")
             else:
-                tkinter.messagebox.showinfo("Invalid", "Only Charater, Number and ; (semicolon)  are allowed.")
+                show_error_message("Invalid", "Only letter(start and end with), whitespace and semicolon (; as separator) are allowed.")
         
        
 class MainView(Page):
@@ -310,6 +356,7 @@ class MainView(Page):
         if (EVENTS_REMINDER_SERVICE 
             or NOTE_MAKING_SERVICE 
             or MUSIC_PLAYING_SERVICE
+            or QUERY_SERVICE
         ):
             self.service_start_btn_var.set("Running Service...")
             self.assistant_response_label.pack(side="top", pady=26)
@@ -325,15 +372,18 @@ class MainView(Page):
         global EVENTS_REMINDER_SERVICE
         global NOTE_MAKING_SERVICE
         global MUSIC_PLAYING_SERVICE
+        global QUERY_SERVICE
         awake = ""
         events_reminder_strings = []
         note_making_strings = []
         music_playing_strings = []
+        query_service_strings = []
         
         if (not is_internet() 
             and (EVENTS_REMINDER_SERVICE 
                     or NOTE_MAKING_SERVICE 
                     or MUSIC_PLAYING_SERVICE
+                    or QUERY_SERVICE
                 )
             ):
             show_error_message(title="Connection error", message="Services are activated that required an internet connection.")
@@ -353,6 +403,10 @@ class MainView(Page):
                 self.p1.music_playing_service_var.set(False)
                 MUSIC_PLAYING_SERVICE = False
                 config["DEFAULT"]["music_playing_service"] = "0"
+            if self.p1.query_service_var.get():
+                self.p1.query_service_var.set(False)
+                QUERY_SERVICE = False
+                config["DEFAULT"]["query_service"] = "0"
             # Write into config file        
             with open('config.ini', 'w') as configfile:
                 config.write(configfile)
@@ -363,6 +417,8 @@ class MainView(Page):
                 note_making_strings = file.read().split(";")
             with open("music_playing_strings.txt", "r") as file:
                 music_playing_strings = file.read().split(";")
+            with open("query_service_strings.txt", "r") as file:
+                query_service_strings = file.read().split(";")
             with open("assistant_strings.txt", "r") as file:
                 awake = file.read()
 
@@ -406,7 +462,7 @@ class MainView(Page):
                         for phrase in note_making_strings:
                             if phrase in text:
                                 recognize = True
-                                speak("What would you like to me write down?")
+                                speak("What would you, like to write?")
                                 note_text = get_audio(status_bar=self.status_bar)
                                 make_note(note_text)
                                 speak("I have made a note of that")
@@ -416,10 +472,19 @@ class MainView(Page):
                         for phrase in music_playing_strings:
                             if phrase in text:
                                 recognize = True
-                                speak("What would you like to play?")
+                                speak("What would you, like to play?")
                                 music_text = get_audio(status_bar=self.status_bar)
                                 play_from_online(music_text, status_bar=self.status_bar)
-                                break      
+                                break
+
+                    if QUERY_SERVICE:
+                        for phrase in query_service_strings:
+                            if phrase in text:
+                                recognize = True
+                                speak("What would you, like to know?")
+                                query_text = get_audio(status_bar=self.status_bar)
+                                query_from_online(query_text, status_bar=self.status_bar)
+                                break       
                             
                     if not recognize:
                         speak("Sorry, I can't understan, Please try again")

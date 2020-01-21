@@ -69,14 +69,13 @@ For pafy dependancy
 pip install --upgrade youtube_dl
 ```
 
-#### Then install the Google client library:
+#### Install the Google client library:
 ``` 
 pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib
 ```
 
-### For Google calendar events:
+#### For Google calendar events:
 Turn on the Google Calendar API from [here](https://developers.google.com/calendar/quickstart/python) and download the credentials.json file and place it to root directory.
-
 
 #### Caution
 We may need to check on our microphone volume settings. 
@@ -85,7 +84,6 @@ If it is too insensitive, the microphone may be rejecting speech as just noise.
 
 ### Watch output on YouTube:
 [![Virtual Voice Assistant Image](https://github.com/almasud/Virtual_Voice_Assistant/blob/master/screenshot.jpg)](https://youtu.be/D5ClCGMC0GU)
-
 
 ##### Thank you all and happy codding... 
 [Abdullah Almasud](https://facebook.com/almasud.arm)

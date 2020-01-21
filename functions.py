@@ -11,7 +11,6 @@ import pyttsx3
 import speech_recognition as sr
 import pytz
 import subprocess
-import webbrowser
 import urllib.request
 import urllib.parse
 import re
@@ -225,3 +224,35 @@ def play_from_online(text, status_bar=None):
     # Take time to open vlc
     while not media.is_playing():
         time.sleep(1)
+
+# For query about a person
+def query_from_online(query_text, status_bar=None):
+    from apiclient.discovery import build
+    from functions import speak
+    import webbrowser
+    # Custom module that stores private keys
+    from private_keys import (
+        # Create a google developer API key and enable custom search engine API 
+        google_python_api_key,
+        # Create a google custom search engine and get the search engine key 
+        google_custom_search_engine_id
+    )
+
+    resource = build("customsearch", 'v1', developerKey=google_python_api_key).cse()
+    result = resource.list(q=query_text, cx=google_custom_search_engine_id).execute()
+    snippet = result['items'][0]["snippet"]
+    formattedUrl = result['items'][0]["formattedUrl"]
+
+    # Format the snipet strings by adding comma (,) between every
+    # two words for better readabilty
+    step = 2
+    formatted_snippet = ", ".join([" ".join(snippet.split(" ")[i:i+step]) 
+            for i in range(0, len(snippet.split(" ")), step)])
+    print(formatted_snippet)
+    speak(formatted_snippet)
+
+    # If more query render into web browser.
+    speak("Would you like to, konw more?")
+    if  get_audio(status_bar=status_bar).lower().count("yes") > 0:
+        webbrowser.open(formattedUrl)
+    
