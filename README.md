@@ -83,7 +83,7 @@ If it's too sensitive, the microphone may be picking up a lot of ambient noise.
 If it is too insensitive, the microphone may be rejecting speech as just noise.
 
 ### Watch output on YouTube:
-[![Virtual Voice Assistant Image](https://github.com/almasud/Virtual_Voice_Assistant/blob/master/screenshot.jpg)](https://youtu.be/D5ClCGMC0GU)
+[![Virtual Assistant Image](https://github.com/almasud/Virtual_Voice_Assistant/blob/master/screenshot.jpg)](https://youtu.be/yjxzA8449qs)
 
 ##### Thank you all and happy codding... 
 [Abdullah Almasud](https://facebook.com/almasud.arm)
