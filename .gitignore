@@ -1,4 +1,5 @@
 venv
+notes
 .vscode
 *.mp3
 *.pickle

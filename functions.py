@@ -35,7 +35,7 @@ def speak(text):
     engine.runAndWait()
 
 # For text from audio input
-def get_audio(status_bar=None):
+def get_audio(timeout=None, status_bar=None):
     r = sr.Recognizer()
     said = ""
     try:
@@ -49,7 +49,7 @@ def get_audio(status_bar=None):
             print("Listening...")
             if status_bar:
                 status_bar["text"] = "Listening..."
-            audio = r.listen(source)
+            audio = r.listen(source, timeout=timeout)
             try:
                 said = r.recognize_google(audio)
                 print("You say: " + said)

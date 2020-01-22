@@ -4,6 +4,7 @@ import re
 import configparser
 import threading
 import datetime
+from PIL import ImageTk, Image
 from functions import (
     authenticate_google_calender, get_audio, speak, make_note, get_date, 
     get_events, is_internet, play_from_online, query_from_online
@@ -35,21 +36,31 @@ class Page1(Page):
         self.note_making_service_var = tk.IntVar()
         self.music_playing_service_var = tk.IntVar()
         self.query_service_var = tk.IntVar()
+        self.chk_img = ImageTk.PhotoImage(
+            Image.open(r"checkbox.png").resize((20, 20), Image.ANTIALIAS)
+            )
+        self.unchk_img = ImageTk.PhotoImage(
+            Image.open(r"uncheckbox.png").resize((20, 20), Image.ANTIALIAS)
+            )
 
         service_label = tk.Label(self, text="Active Services", font=(16))
         services_frame = tk.Frame(self)
         self.events_reminder_service_checkbox = tk.Checkbutton(services_frame, 
             variable=self.events_reminder_service_var, command=self.active_service, 
-            text="Events Reminder")
+            text="Events Reminder", indicatoron=False, bd=0, image=self.unchk_img,
+            selectimage=self.chk_img, compound="left", selectcolor="#F0F0F0")
         self.note_making_service_checkbox = tk.Checkbutton(services_frame,  
             variable=self.note_making_service_var, command=self.active_service,  
-            text="Note Making")
+            text="Note Making", indicatoron=False, bd=0, image=self.unchk_img,
+            selectimage=self.chk_img, compound="left", selectcolor="#F0F0F0")
         self.music_playing_service_checkbox = tk.Checkbutton(services_frame,  
             variable=self.music_playing_service_var, command=self.active_service,  
-            text="Music Playing")
+            text="Music Playing", indicatoron=False, bd=0, image=self.unchk_img,
+            selectimage=self.chk_img, compound="left", selectcolor="#F0F0F0")
         self.query_service_checkbox = tk.Checkbutton(services_frame, 
             variable=self.query_service_var, command=self.active_service, 
-            text="Query Service")
+            text="Query Service", indicatoron=False, bd=0, image=self.unchk_img,
+            selectimage=self.chk_img, compound="left", selectcolor="#F0F0F0")
 
         # Displaying the views
         service_label.pack(side="top", pady=5)
@@ -210,12 +221,12 @@ class Page2(Page):
         
         # Response strings for Services
         response_str_label = tk.Label(self, text="Response strings of Services", 
-            font=("arial", 12), fg="#444")
+            font=("arial", 12), fg="#2280C6")
         response_str_label.grid(row=1, columnspan=2, pady=5)
 
         #  Assistant service response strings
         assistant_str_label = tk.Label(self, text="Assistant", 
-            font=("arial", 10, "bold"), fg="#444")
+            font=("arial", 10, "bold"), fg="#2280C6")
         assistant_str_label.grid(row=2, sticky="W", padx=5)
         assistant_str_entry = tk.Entry(self, width=35, font=("arial", 12), 
             textvariable=self.assistant_strings_var, fg="#444", bd=1, bg="#fff")
@@ -223,7 +234,7 @@ class Page2(Page):
 
         # Events reminder service response strings
         events_reminder_str_label = tk.Label(self, text="Events Reminder", 
-            font=("arial", 10, "bold"), fg="#444")
+            font=("arial", 10, "bold"), fg="#2280C6")
         events_reminder_str_label.grid(row=3, sticky="W", padx=5)
         events_reminder_str_entry = tk.Entry(self, width=35, font=("arial", 12), 
             textvariable=self.events_reminder_strings_var, fg="#444", bd=1, bg="#fff")
@@ -231,7 +242,7 @@ class Page2(Page):
 
         # Note Making service response strings
         note_str_label = tk.Label(self, text="Note Making", 
-            font=("arial", 10, "bold"), fg="#444")
+            font=("arial", 10, "bold"), fg="#2280C6")
         note_str_label.grid(row=4, sticky="W", padx=5)
         note_str_entry = tk.Entry(self, width=35, font=("arial", 12), 
             textvariable=self.note_making_strings_var, fg="#444", bd=1, bg="#fff")
@@ -239,7 +250,7 @@ class Page2(Page):
         
         # Music Playing service response strings
         music_str_label = tk.Label(self, text="Music Playing", 
-            font=("arial", 10, "bold"), fg="#444")
+            font=("arial", 10, "bold"), fg="#2280C6")
         music_str_label.grid(row=5, sticky="W", padx=5)
         music_str_entry = tk.Entry(self, width=35, font=("arial", 12), 
             textvariable=self.music_playing_strings_var, fg="#444", bd=1, bg="#fff")
@@ -247,7 +258,7 @@ class Page2(Page):
 
         #  Query service response strings
         query_service_str_label = tk.Label(self, text="Query Service", 
-            font=("arial", 10, "bold"), fg="#444")
+            font=("arial", 10, "bold"), fg="#2280C6")
         query_service_str_label.grid(row=6, sticky="W", padx=5)
         query_service_str_entry = tk.Entry(self, width=35, font=("arial", 12), 
             textvariable=self.query_service_strings_var, fg="#444", bd=1, bg="#fff")
@@ -255,7 +266,7 @@ class Page2(Page):
         
         # Save Button
         save_btn = tk.Button(self, text="Save", font=("arial", 12), 
-            bg="#444", fg="#fff", command=self.save_strings, cursor="hand2")
+            bg="#066DBA", fg="#fff", command=self.save_strings, cursor="hand2")
         save_btn.grid(row=7, columnspan=2)
 
     def save_strings(self):
@@ -322,12 +333,12 @@ class MainView(Page):
         edit_menu.add_command(label="Settings", command=self.p2.show)
 
         #Code for top frame
-        label = tk.Label(self.top_frame, text="Virtual Assistant", fg="green", font=("tahoma", 16, "bold", "italic"))
+        label = tk.Label(self.top_frame, text="Virtual Assistant", fg="#066DBA", font=("tahoma", 16, "bold", "italic"))
         label.pack(side="top")
 
         # Code for container Frame
         # Button for back to Page 1 from Page 2
-        back_btn = tk.Button(self.p2, text="<= Back", fg="#fff", bg="#444",
+        back_btn = tk.Button(self.p2, text="<= Back", fg="#fff", bg="#066DBA",
             command=self.p1.show, font=("arial", 10, "bold"), cursor="hand2")
         back_btn.grid(row=0)
         # Show page1 as default page
@@ -341,7 +352,7 @@ class MainView(Page):
         self.service_start_btn_var = tk.StringVar()
         self.service_start_btn_var.set("Start Service")
         service_start_btn = tk.Button(self.p1, textvariable=self.service_start_btn_var, 
-            font=("arial", 12), bg="#444", fg="#fff", cursor="hand2", command=self.service_listener)
+            font=("arial", 12), bg="#066DBA", fg="#fff", cursor="hand2", command=self.service_listener)
         service_start_btn.pack(side="top", pady=25)
 
         # Assistant respone text lable
@@ -423,11 +434,12 @@ class MainView(Page):
                 awake = file.read()
 
             try:
+                max_listen_time = 5
                 print("Say '" + awake + "' for response")
                 self.status_bar["text"] = "Say '" + awake + "' for response"
-                if get_audio(status_bar=self.status_bar).lower().count(awake) > 0:
+                if get_audio(timeout=max_listen_time, status_bar=self.status_bar).lower().count(awake) > 0:
                     speak("Hello, I am your assistant. How can I help you?")
-                    text = get_audio(status_bar=self.status_bar).lower()
+                    text = get_audio(timeout=max_listen_time, status_bar=self.status_bar).lower()
                     recognize = False
                     today = datetime.date.today()
 
@@ -473,7 +485,7 @@ class MainView(Page):
                             if phrase in text:
                                 recognize = True
                                 speak("What would you, like to play?")
-                                music_text = get_audio(status_bar=self.status_bar)
+                                music_text = get_audio(timeout=max_listen_time, status_bar=self.status_bar)
                                 play_from_online(music_text, status_bar=self.status_bar)
                                 break
 
@@ -482,7 +494,7 @@ class MainView(Page):
                             if phrase in text:
                                 recognize = True
                                 speak("What would you, like to know?")
-                                query_text = get_audio(status_bar=self.status_bar)
+                                query_text = get_audio(timeout=max_listen_time, status_bar=self.status_bar)
                                 query_from_online(query_text, status_bar=self.status_bar)
                                 break       
                             

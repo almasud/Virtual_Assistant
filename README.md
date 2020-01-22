@@ -34,11 +34,19 @@ In the project root directory type:
 ```source/venv/bin/activate``` and hit enter
 
 #### Now install some required libraries for our project:
+Install python timezone
 ```
 pip install pytz
+```
+Install python image library
+```
+pip install Pillow
+```
+Install python SpeechRecognition library
+```
 pip install SpeechRecognition
 ```
-Install PyAudio (Required to work with SpeechRecognition):
+Install python ```PyAudio``` library (Required to work with ```SpeechRecognition```):
 
 There is no wheel (prebuilt package) for Python 3.7 or above on Windows.
 We need to download pyaudio from [here](https://www.lfd.uci.edu/~gohlke/pythonlibs/#pyaudio).
@@ -47,24 +55,26 @@ After download, just type
 ```
 pip install <downloaded file name>
 ```
-Install pyttsx3:
+Install python text-to-speech library:
 ```
 pip install pyttsx3
 ```
 pyttsx3 is a Text to Speech (TTS) library for Python 2 and 3. Works without internet connection 
 or delay. Supports multiple TTS engines, including Sapi5, nsss, and espeak.
 
+Install python vlc library to work with VLC media player:
 ```
 pip install python-vlc 
 ```
 This module provides ctypes-based bindings for the native libvlc API of the VLC video player. Note that it relies on an already present install of VLC.
 
+Install python pafy library:
 ```
 pip install pafy
 ```
 Retrieve YouTube content and metadata. Retrieve the URL to stream the video in a vlc player.
  
-For pafy dependancy
+Install ```youtube-dl``` (Required to work with ```pafy```)
 ```
 pip install --upgrade youtube_dl
 ```
