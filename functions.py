@@ -35,7 +35,7 @@ def speak(text):
     engine.runAndWait()
 
 # For text from audio input
-def get_audio(timeout=None, status_bar=None):
+def get_audio(status_bar=None):
     r = sr.Recognizer()
     said = ""
     try:
@@ -49,7 +49,7 @@ def get_audio(timeout=None, status_bar=None):
             print("Listening...")
             if status_bar:
                 status_bar["text"] = "Listening..."
-            audio = r.listen(source, timeout=timeout)
+            audio = r.listen(source)
             try:
                 said = r.recognize_google(audio)
                 print("You say: " + said)
@@ -252,7 +252,7 @@ def query_from_online(query_text, status_bar=None):
     speak(formatted_snippet)
 
     # If more query render into web browser.
-    speak("Would you like to, konw more?")
+    speak("Would you like to, know more?")
     if  get_audio(status_bar=status_bar).lower().count("yes") > 0:
         webbrowser.open(formattedUrl)
     

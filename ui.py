@@ -201,7 +201,7 @@ class Page2(Page):
 
         if len(events_reminder_strings_file) == 0:
             with open("events_reminder_strings.txt", "w") as file:
-                file.write("what i have;do i have plans;do i have any plan;am i busy;mi busy")
+                file.write("what i have;have plans;any plan;am i busy;mi busy")
         self.events_reminder_strings_var.set(events_reminder_strings_file)
 
         if len(note_making_strings_file) == 0:
@@ -434,12 +434,11 @@ class MainView(Page):
                 awake = file.read()
 
             try:
-                max_listen_time = 5
                 print("Say '" + awake + "' for response")
                 self.status_bar["text"] = "Say '" + awake + "' for response"
-                if get_audio(timeout=max_listen_time, status_bar=self.status_bar).lower().count(awake) > 0:
+                if get_audio(status_bar=self.status_bar).lower().count(awake) > 0:
                     speak("Hello, I am your assistant. How can I help you?")
-                    text = get_audio(timeout=max_listen_time, status_bar=self.status_bar).lower()
+                    text = get_audio(status_bar=self.status_bar).lower()
                     recognize = False
                     today = datetime.date.today()
 
@@ -485,7 +484,7 @@ class MainView(Page):
                             if phrase in text:
                                 recognize = True
                                 speak("What would you, like to play?")
-                                music_text = get_audio(timeout=max_listen_time, status_bar=self.status_bar)
+                                music_text = get_audio(status_bar=self.status_bar)
                                 play_from_online(music_text, status_bar=self.status_bar)
                                 break
 
@@ -494,7 +493,7 @@ class MainView(Page):
                             if phrase in text:
                                 recognize = True
                                 speak("What would you, like to know?")
-                                query_text = get_audio(timeout=max_listen_time, status_bar=self.status_bar)
+                                query_text = get_audio(status_bar=self.status_bar)
                                 query_from_online(query_text, status_bar=self.status_bar)
                                 break       
                             
